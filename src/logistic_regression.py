@@ -14,16 +14,24 @@
 # dL/db = dL/dz * dz/db =  dL/da * da/dz * dz/db =  dL/da * da/dz  (plug stuff in to compute)
 # now apply gradient descent, w_new = w_old - alpha * dL/dw, b_new = b_old - alpha * dL/db
 import numpy as np
+from sklearn.metrics import accuracy_score
+
+from utils import compute_cost, load_data, sigmoid, baseline
 
 np.random.seed(1)
 
 
-# Define parameters
 def init_parameters(n_x: int) -> dict:
     """
-    n_x : number of features
+    Initialise parameters (weights/biases)
 
-    returns: a dict of parameters W & b
+    Parameters
+    ----------
+    n_x : size of input layer (number of features)
+
+    Returns
+    ----------
+    a dict of parameters W & b
     """
     return {
         "W": np.zeros((1, n_x)),  # one weight per feature,
@@ -31,21 +39,19 @@ def init_parameters(n_x: int) -> dict:
     }
 
 
-# Define activation function
-def sigmoid(z: np.array) -> np.array:
-    """
-    computes sigmoid of z
-    """
-    return 1 / (1 + np.exp(-z))
-
-
-# Compute Cost
-def compute_cost(y: np.array, y_hat: np.array) -> float:
-    return -np.mean([y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat)])
-
-
-# Forward propagation
 def forward_prop(X: np.ndarray, params: dict) -> np.ndarray:
+    """
+    Forward propagation step
+
+    Parameters
+    ----------
+    X: Input matrix. [n,m] dimension where n is number of features and m is the number of samples.
+    params: Dictionary of parameters containing weights and biases
+
+    Returns
+    --------
+    Model Prediction (shape [1,m])
+    """
     W = params["W"]  # [1,n]
     b = params["b"]  # 0
     Z = np.dot(W, X) + b  # [1,m] = [1,n] * [n,m] + [1,m]
@@ -53,11 +59,21 @@ def forward_prop(X: np.ndarray, params: dict) -> np.ndarray:
     return A
 
 
-# Backward propagation
-
-
-# Compute gradients
 def compute_grads(X, Y, A, params):
+    """
+    Compute gradients using backpropagation algorithm
+
+    Parameters
+    ----------
+    X: [n,m] matrix of training examples
+    Y: [1,m] matrix of output labels/values
+    A: [1,m] prediction obtained from forward-propagation step
+    params: Dictionary of weights & biases
+
+    Returns
+    ---------
+    a dictionary containing the gradients
+    """
 
     dA = -(Y / A) + (1 - Y) / (1 - A)  # [1,m]
     dZ = dA * A * (1 - A)  # [1,m]
@@ -67,8 +83,20 @@ def compute_grads(X, Y, A, params):
     return dict(dA=dA, dZ=dZ, dW=dW, db=db)
 
 
-# Update weights
 def update_weights(params: dict, grads: dict, learning_rate: float) -> dict:
+    """
+    Update weights & biases using gradient descent.
+
+    Parameters
+    ----------
+    params: dictionary of weights & biases for each layer
+    grads: dictionary of gradients of weights & biases computed from back-propagation
+    learning_rate: step-size for gradient descent update
+
+    Returns
+    --------
+    a dictionary of updated parameters (weights & biases)
+    """
 
     W = params["W"]
     b = params["b"]
@@ -86,6 +114,20 @@ def update_weights(params: dict, grads: dict, learning_rate: float) -> dict:
 
 
 def train(X: np.ndarray, y: np.ndarray, epoch: int = 100, learning_rate: float = 0.01) -> dict:
+    """
+    Train a logistic regression model
+
+    Parameters
+    ----------
+    X: [n,m] matrix of training examples
+    Y: [1,m] matrix of output labels/values
+    epoch: number of iterations to perform
+    learning_rate: step-size for gradient descent update
+
+    Returns
+    ---------
+    a dictionary of learnt parameters (weights & biases)
+    """
 
     params = init_parameters(X.shape[0])
 
@@ -105,47 +147,12 @@ def train(X: np.ndarray, y: np.ndarray, epoch: int = 100, learning_rate: float =
     return params
 
 
-def load_data():
-
-    # X = np.random.randn(2, 100)  # [n,m]. All training examples aligned in columns.
-    # Y = np.random.randint(0, 2, size=(1, X.shape[1]))
-
-    import pandas as pd
-    from sklearn.preprocessing import MinMaxScaler
-
-    scaler = MinMaxScaler()
-    df = pd.read_csv("../data/haberman.data", header=None)
-    df[3] = df[3].map({2: 0, 1: 1})  # 1 = survived, 2 = died
-
-    X = scaler.fit_transform(df[[0, 1, 2]].values).T
-    Y = df[3].values.reshape(1, -1)
-
-    return X, Y
-
-
-def baseline(X, Y):
-
-    # standard library
-    from sklearn.linear_model import LogisticRegression
-
-    lr = LogisticRegression()
-    lr.fit(X, Y)
-    y_pred_lib = lr.predict(X)
-    acc_lib = accuracy_score(y_true=Y, y_pred=y_pred_lib)
-    print(f"accuracy lib = {acc_lib}%")
-
-
 if __name__ == "__main__":
     X, Y = load_data()
-    params = train(X=X, y=Y, epoch=1000, learning_rate=0.01)
+    params = train(X=X, y=Y, epoch=100, learning_rate=0.01)
 
     y_pred = forward_prop(X, params).round()
-
-    from sklearn.metrics import accuracy_score
-
-    acc = np.round(accuracy_score(y_true=Y.T, y_pred=y_pred.T), 2) * 100
-
-    print(f"accuracy = {acc}%")
-
-    baseline(X.T, Y.T)
-
+    acc = np.round(accuracy_score(y_true=Y.T, y_pred=y_pred.T), 3) * 100
+    acc_lib = baseline(X.T, np.ravel(Y))
+    print(f"accuracy [our implementation] = {acc}%")
+    print(f"accuracy [sklearn] = {acc_lib}%")

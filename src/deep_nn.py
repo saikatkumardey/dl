@@ -1,14 +1,21 @@
 import numpy as np
+from sklearn.metrics import accuracy_score
+from utils import compute_cost, load_data, sigmoid, sigmoid_prime, baseline
 
 np.random.seed(1)
 
 
-# Define parameters
 def init_parameters(layer_dims: list) -> dict:
     """
+    Initialise parameters (weights/biases) to be learnt by the neural network.
+
+    Parameters
+    ----------
     layer_dims: number of neurons in each layer (including the input/output layer)
 
-    returns: a dict of parameters Ws & bs
+    Returns
+    ---------
+    a dict of parameters Ws & bs for each layer
     """
 
     params = {}
@@ -20,32 +27,19 @@ def init_parameters(layer_dims: list) -> dict:
     return params
 
 
-# Define activation function
-def sigmoid(Z: np.array) -> np.array:
-    """
-    computes sigmoid of Z
-    """
-    return 1 / (1 + np.exp(-Z))
-
-
-def sigmoid_backward(A: np.array) -> np.array:
-    """
-    A is sigmoid()
-    """
-    return A * (1 - A)
-
-
-# Compute Cost
-def compute_cost(y: np.array, y_hat: np.array) -> float:
-    """
-    y: actual
-    y_hat: predictions
-    """
-    return -np.mean([y * np.nan_to_num(np.log(y_hat)) + (1 - y) * np.nan_to_num(np.log(1 - y_hat))])
-
-
-# Forward propagation
 def forward_prop(X: np.ndarray, params: dict) -> [np.ndarray, dict]:
+    """
+    Forward propagation step
+
+    Parameters
+    ----------
+    X: Input matrix. [n,m] dimension where n is number of features and m is the number of samples.
+    params: Dictionary of parameters containing weights and biases for each layer
+
+    Returns
+    --------
+    a tuple (Prediction of the neural network, Dictionary containing intermediate variables for use in backpropagation)
+    """
     cache = {}
     layers = len(params)
     cache[0] = {"A": X}
@@ -58,8 +52,21 @@ def forward_prop(X: np.ndarray, params: dict) -> [np.ndarray, dict]:
     return Al, cache
 
 
-# Backward propagation: Compute gradients
 def compute_grads(X: np.ndarray, Y: np.ndarray, cache: dict, params: dict) -> dict:
+    """
+    Compute gradients using backpropagation algorithm
+
+    Parameters
+    ----------
+    X: [n,m] matrix of training examples
+    Y: [1,m] matrix of output labels/values
+    cache: Dictionary of intermediate values from forward-propagation step
+    params: Dictionary of weights & biases from each layer
+
+    Returns
+    ---------
+    a dictionary containing the gradients computed for each layer
+    """
 
     m = X.shape[0]
     grads = {}
@@ -67,13 +74,13 @@ def compute_grads(X: np.ndarray, Y: np.ndarray, cache: dict, params: dict) -> di
 
     A = cache[layers]["A"]
     dA = -(Y / A) + (1 - Y) / (1 - A)
-    dZ = dA * sigmoid_backward(A)
+    dZ = dA * sigmoid_prime(A)
     grads[layers] = {"dA": dA, "dZ": dZ}
 
     for l in range(layers - 1, 0, -1):
         next_layer = l + 1
         dA = np.dot(params[next_layer]["W"].T, grads[next_layer]["dZ"])
-        dZ = dA * sigmoid_backward(cache[l]["A"])
+        dZ = dA * sigmoid_prime(cache[l]["A"])
         grads[l] = {"dA": dA, "dZ": dZ}
 
     for l in range(1, layers + 1):
@@ -83,8 +90,20 @@ def compute_grads(X: np.ndarray, Y: np.ndarray, cache: dict, params: dict) -> di
     return grads
 
 
-# Update weights
 def update_weights(params: dict, grads: dict, learning_rate: float) -> dict:
+    """
+    Update weights & biases using gradient descent.
+
+    Parameters
+    ----------
+    params: dictionary of weights & biases for each layer
+    grads: dictionary of gradients of weights & biases computed from back-propagation
+    learning_rate: step-size for gradient descent update
+
+    Returns
+    --------
+    a dictionary of updated parameters (weights & biases for each layer)
+    """
 
     layers = len(params)
     # update weights & biases
@@ -102,6 +121,21 @@ def train(
     epoch: int = 100,
     learning_rate: float = 0.01,
 ) -> dict:
+    """
+    Train a neural network
+
+    Parameters
+    ----------
+    X: [n,m] matrix of training examples
+    Y: [1,m] matrix of output labels/values
+    hidden_layer_dims: a list of hidden layer dimensions where each item denotes number of neurons in that layer
+    epoch: number of iterations to perform
+    learning_rate: step-size for gradient descent update
+
+    Returns
+    ---------
+    a dictionary of learnt parameters (weights & biases)
+    """
 
     n_x = X.shape[0]
     n_y = y.shape[0]
@@ -119,42 +153,22 @@ def train(
         params = update_weights(
             params=params, grads=grads, learning_rate=learning_rate
         )  # update weight using gradient descent
-        if i % 100 == 0:
+        if i % epoch == 0:
             print(f"epoch={i}\tcost={cost}")
     print(f"learnt params: {params}")
 
     return params
 
 
-def load_data():
-
-    # X = np.random.randn(2, 100)  # [n,m]. All training examples aligned in columns.
-    # Y = np.random.randint(0, 2, size=(1, X.shape[1]))
-
-    import pandas as pd
-    from sklearn.preprocessing import MinMaxScaler
-
-    scaler = MinMaxScaler()
-    df = pd.read_csv("../data/haberman.data", header=None)
-    df[3] = df[3].map({2: 0, 1: 1})  # 1 = survived, 2 = died
-
-    X = scaler.fit_transform(df[[0, 1, 2]].values).T
-    Y = df[3].values.reshape(1, -1)
-
-    return X, Y
-
-
 if __name__ == "__main__":
 
     X, Y = load_data()
+
     params = train(X=X, y=Y, hidden_layer_dims=[3, 3], epoch=1000, learning_rate=0.0001)
-
     y_pred, _ = forward_prop(X, params)
-    y_pred = y_pred.round()
+    y_pred = y_pred.round()  # prediction > 0.5 is rounded to 1, otherwise 0
 
-    from sklearn.metrics import accuracy_score
-
-    acc = np.round(accuracy_score(y_true=Y.T, y_pred=y_pred.T), 2) * 100
-
-    print(f"accuracy = {acc}%")
-
+    acc = np.round(accuracy_score(y_true=np.ravel(Y), y_pred=np.ravel(y_pred)), 3) * 100
+    acc_lib = baseline(X.T, np.ravel(Y))
+    print(f"accuracy [our implementation] = {acc}%")
+    print(f"accuracy [sklearn] = {acc_lib}%")
