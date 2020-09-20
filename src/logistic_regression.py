@@ -140,7 +140,7 @@ def train(X: np.ndarray, y: np.ndarray, epoch: int = 100, learning_rate: float =
         params = update_weights(
             params=params, grads=grads, learning_rate=learning_rate
         )  # update weight using gradient descent
-        if i % 10 == 0:
+        if i % 100 == 0:
             print(f"epoch={i}\tcost={cost}")
     print(f"learnt params: {params}")
 
@@ -149,7 +149,7 @@ def train(X: np.ndarray, y: np.ndarray, epoch: int = 100, learning_rate: float =
 
 if __name__ == "__main__":
     X, Y = load_data()
-    params = train(X=X, y=Y, epoch=100, learning_rate=0.01)
+    params = train(X=X, y=Y, epoch=1000, learning_rate=0.01)
 
     y_pred = forward_prop(X, params).round()
     acc = np.round(accuracy_score(y_true=Y.T, y_pred=y_pred.T), 3) * 100
