@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.metrics import accuracy_score
 
-from utils import compute_cost, load_data, sigmoid, sigmoid_prime, baseline
+from utils import baseline, compute_cost, load_data, sigmoid, sigmoid_prime
 
 np.random.seed(1)
 
@@ -157,7 +157,7 @@ def train(
     print(f"initial params: {params}")
     for i in range(epoch):
         A, cache = forward_prop(X=X, params=params)  # forward prop to get prediction
-        cost = compute_cost(y=Y, y_hat=A)  # compute cost
+        cost = compute_cost(Y=Y, Y_hat=A)  # compute cost
         grads = compute_grads(X=X, Y=Y, cache=cache, params=params)  # compute gradient
         params = update_weights(
             params=params, grads=grads, learning_rate=learning_rate

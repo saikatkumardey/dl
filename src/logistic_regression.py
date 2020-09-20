@@ -135,7 +135,7 @@ def train(X: np.ndarray, y: np.ndarray, epoch: int = 100, learning_rate: float =
     print(f"initial params: {params}")
     for i in range(epoch):
         A = forward_prop(X=X, params=params)  # forward prop to get prediction
-        cost = compute_cost(y=Y, y_hat=A)  # compute cost
+        cost = compute_cost(Y=Y, Y_hat=A)  # compute cost
         grads = compute_grads(X=X, Y=Y, A=A, params=params)  # compute gradient
         params = update_weights(
             params=params, grads=grads, learning_rate=learning_rate

@@ -148,7 +148,7 @@ def train(
     print(f"initial params: {params}")
     for i in range(epoch):
         A, cache = forward_prop(X=X, params=params)  # forward prop to get prediction
-        cost = compute_cost(y=Y, y_hat=A)  # compute cost
+        cost = compute_cost(Y=Y, Y_hat=A)  # compute cost
         grads = compute_grads(X=X, Y=Y, cache=cache, params=params)  # compute gradient
         params = update_weights(
             params=params, grads=grads, learning_rate=learning_rate
