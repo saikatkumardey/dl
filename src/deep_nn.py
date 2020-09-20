@@ -98,8 +98,7 @@ def update_weights(params: dict, grads: dict, learning_rate: float) -> dict:
 def train(
     X: np.ndarray,
     y: np.ndarray,
-    hidden_layers: int = 1,
-    n_h: int = 3,
+    hidden_layer_dims: list = [3],
     epoch: int = 100,
     learning_rate: float = 0.01,
 ) -> dict:
@@ -107,7 +106,7 @@ def train(
     n_x = X.shape[0]
     n_y = y.shape[0]
 
-    layer_dims = [n_x] + [n_h] * hidden_layers + [n_y]
+    layer_dims = [n_x] + hidden_layer_dims + [n_y]
     params = init_parameters(layer_dims=layer_dims)
 
     print(f"X.shape = {X.shape}, Y.shape = {Y.shape}")
@@ -148,7 +147,7 @@ def load_data():
 if __name__ == "__main__":
 
     X, Y = load_data()
-    params = train(X=X, y=Y, hidden_layers=1, n_h=3, epoch=1000, learning_rate=0.0001)
+    params = train(X=X, y=Y, hidden_layer_dims=[3, 3], epoch=1000, learning_rate=0.0001)
 
     y_pred, _ = forward_prop(X, params)
     y_pred = y_pred.round()
