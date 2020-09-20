@@ -54,7 +54,7 @@ def forward_prop(X: np.ndarray, params: dict) -> np.ndarray:
     """
     W = params["W"]  # [1,n]
     b = params["b"]  # 0
-    Z = np.dot(W, X) + b  # [1,m] = [1,n] * [n,m] + [1,m]
+    Z = np.dot(W, X) + b  # [1,m] = [1,n] . [n,m] + [1,m]
     A = sigmoid(Z)  # [1,m]
     return A
 
@@ -77,7 +77,7 @@ def compute_grads(X, Y, A, params):
 
     dA = -(Y / A) + (1 - Y) / (1 - A)  # [1,m]
     dZ = dA * A * (1 - A)  # [1,m]
-    dW = np.dot(dZ, X.T)  # [1,n] = [1,m] * [m,n]
+    dW = np.dot(dZ, X.T)  # [1,n] = [1,m] . [m,n]
     db = np.mean(dZ, axis=1, keepdims=True)  # [1,1]
 
     return dict(dA=dA, dZ=dZ, dW=dW, db=db)

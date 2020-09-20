@@ -47,9 +47,9 @@ def forward_prop(X: np.ndarray, params: dict) -> [np.ndarray, dict]:
     W2 = params["W2"]  # [n_y,n_h]
     b2 = params["b2"]  # [n_y,1]
 
-    Z1 = np.dot(W1, X) + b1  # [n_h,m] = [n_h,n_x] * [n_x,m] + [1,m]
+    Z1 = np.dot(W1, X) + b1  # [n_h,m] = [n_h,n_x] . [n_x,m] + [1,m]
     A1 = sigmoid(Z1)  # [n_h,m]
-    Z2 = np.dot(W2, A1) + b2  # [n_y,m] = [n_y,n_h] * [n_h,m] + [n_y,1]
+    Z2 = np.dot(W2, A1) + b2  # [n_y,m] = [n_y,n_h] . [n_h,m] + [n_y,1]
     A2 = sigmoid(Z2)  # [n_y,m]
 
     cache = dict(A1=A1, A2=A2)
@@ -81,13 +81,13 @@ def compute_grads(X: np.ndarray, Y: np.ndarray, cache: dict, params: dict) -> di
     dA2 = -(Y / A2) + (1 - Y) / (1 - A2)  # [n_y,m]
     dZ2 = dA2 * sigmoid_prime(A2)  # [n_y,m]
 
-    dW2 = np.dot(dZ2, A1.T) / m  #  [n_y,n_h] = [n_y,m] * [m,n_h]
+    dW2 = np.dot(dZ2, A1.T) / m  #  [n_y,n_h] = [n_y,m] . [m,n_h]
     db2 = np.mean(dZ2, axis=1, keepdims=True)  # [n_y,1]
 
-    dA1 = np.dot(W2.T, dZ2)  # [n_h,m] =  [n_h,n_y]* [n_y,m]
+    dA1 = np.dot(W2.T, dZ2)  # [n_h,m] =  [n_h,n_y] . [n_y,m]
     dZ1 = dA1 * sigmoid_prime(A1)  # [n_h,m]
 
-    dW1 = np.dot(dZ1, X.T) / m  # [n_h,n] = [n_h,m] * [ m,n]
+    dW1 = np.dot(dZ1, X.T) / m  # [n_h,n] = [n_h,m] . [ m,n]
     db1 = np.mean(dZ1, axis=1, keepdims=True)  # [n_h,1]
 
     return dict(dW1=dW1, db1=db1, dW2=dW2, db2=db2)
