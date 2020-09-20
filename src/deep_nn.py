@@ -153,7 +153,7 @@ def train(
         params = update_weights(
             params=params, grads=grads, learning_rate=learning_rate
         )  # update weight using gradient descent
-        if i % epoch == 0:
+        if i % 100 == 0:
             print(f"epoch={i}\tcost={cost}")
     print(f"learnt params: {params}")
 
