@@ -93,7 +93,7 @@ def compute_grads(X: np.ndarray, Y: np.ndarray, cache: dict, params: dict) -> di
     return dict(dW1=dW1, db1=db1, dW2=dW2, db2=db2)
 
 
-def update_weights(params: dict, grads: dict, learning_rate: float) -> dict:
+def update_parameters(params: dict, grads: dict, learning_rate: float) -> dict:
     """
     Update weights & biases using gradient descent.
 
@@ -131,7 +131,11 @@ def update_weights(params: dict, grads: dict, learning_rate: float) -> dict:
 
 
 def train(
-    X: np.ndarray, y: np.ndarray, n_h: int = 3, epoch: int = 100, learning_rate: float = 0.01
+    X: np.ndarray,
+    y: np.ndarray,
+    n_h: int = 3,
+    epoch: int = 100,
+    learning_rate: float = 0.01,
 ) -> dict:
     """
     Train a neural network
@@ -159,9 +163,9 @@ def train(
         A, cache = forward_prop(X=X, params=params)  # forward prop to get prediction
         cost = compute_cost(Y=Y, Y_hat=A)  # compute cost
         grads = compute_grads(X=X, Y=Y, cache=cache, params=params)  # compute gradient
-        params = update_weights(
+        params = update_parameters(
             params=params, grads=grads, learning_rate=learning_rate
-        )  # update weight using gradient descent
+        )  # update parameters using gradient descent
         if i % 100 == 0:
             print(f"epoch={i}\tcost={cost}")
     print(f"learnt params: {params}")

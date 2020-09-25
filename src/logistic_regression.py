@@ -83,7 +83,7 @@ def compute_grads(X, Y, A, params):
     return dict(dA=dA, dZ=dZ, dW=dW, db=db)
 
 
-def update_weights(params: dict, grads: dict, learning_rate: float) -> dict:
+def update_parameters(params: dict, grads: dict, learning_rate: float) -> dict:
     """
     Update weights & biases using gradient descent.
 
@@ -113,7 +113,9 @@ def update_weights(params: dict, grads: dict, learning_rate: float) -> dict:
     return params
 
 
-def train(X: np.ndarray, y: np.ndarray, epoch: int = 100, learning_rate: float = 0.01) -> dict:
+def train(
+    X: np.ndarray, y: np.ndarray, epoch: int = 100, learning_rate: float = 0.01
+) -> dict:
     """
     Train a logistic regression model
 
@@ -137,9 +139,9 @@ def train(X: np.ndarray, y: np.ndarray, epoch: int = 100, learning_rate: float =
         A = forward_prop(X=X, params=params)  # forward prop to get prediction
         cost = compute_cost(Y=Y, Y_hat=A)  # compute cost
         grads = compute_grads(X=X, Y=Y, A=A, params=params)  # compute gradient
-        params = update_weights(
+        params = update_parameters(
             params=params, grads=grads, learning_rate=learning_rate
-        )  # update weight using gradient descent
+        )  # update parameters using gradient descent
         if i % 100 == 0:
             print(f"epoch={i}\tcost={cost}")
     print(f"learnt params: {params}")
